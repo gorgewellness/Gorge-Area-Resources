@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Columbia Gorge Resource Finder</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#1b2230;--muted:#5a6577;--accent:#1f5fa8;--accent-t:#fff;--line:#d8dee8;--chip:#e6ebf3;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151d;--card:#19212d;--text:#e6ebf3;--muted:#98a5b8;--accent:#78aef0;--accent-t:#0b1626;--line:#2a3445;--chip:#222c3b}}
+:root[data-theme="dark"]{--bg:#10151d;--card:#19212d;--text:#e6ebf3;--muted:#98a5b8;--accent:#78aef0;--accent-t:#0b1626;--line:#2a3445;--chip:#222c3b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:780px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px}
+.crisis{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:.92rem}
+.crisis a{color:var(--accent);font-weight:600}
+.step{margin-bottom:16px}
+.label{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+button.chip{border:1px solid var(--line);background:var(--chip);color:var(--text);padding:9px 14px;border-radius:999px;font-size:.92rem;cursor:pointer}
+button.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-t);border-color:var(--accent);font-weight:600}
+button.chip small{opacity:.7;margin-left:4px}
+button.clear{background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;padding:6px 0;font-size:.9rem}
+input[type=search]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:1rem;margin:2px 0 12px}
+.count{color:var(--muted);font-size:.9rem;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.card h2{font-size:1.05rem;margin:0 0 6px}
+.tag{display:inline-block;font-size:.75rem;background:var(--chip);border-radius:6px;padding:2px 8px;margin:0 6px 6px 0;color:var(--muted)}
+.tag.svc{color:var(--text);font-weight:600}
+.card p{margin:4px 0 8px}
+.card a{color:var(--accent);font-weight:600;margin-right:14px}
+details{margin:4px 0 10px}summary{cursor:pointer;color:var(--accent);font-weight:600}details ul{margin:6px 0 0;padding-left:20px}details li{margin:2px 0}.note{color:var(--muted);font-size:.85rem;margin-top:24px}
+
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+nav#tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 16px;border-bottom:1px solid var(--line);padding-bottom:10px}
+nav#tabs a{padding:8px 14px;border-radius:999px;text-decoration:none;color:var(--text);background:var(--chip);font-size:.92rem}
+nav#tabs a[aria-current="page"]{background:var(--accent);color:var(--accent-t);font-weight:600}
+.tl{color:var(--text);text-decoration:none}.tl:hover{text-decoration:underline}
+.num{display:inline-block;background:var(--accent);color:var(--accent-t);border-radius:999px;min-width:24px;height:24px;line-height:24px;text-align:center;font-size:.85rem;margin-right:8px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}.acts a{margin-right:0}
+a.more{display:inline-block;margin:0 0 4px;font-size:.92rem}
+.mini{border:1px solid var(--line);background:var(--chip);color:var(--text)!important;padding:7px 12px;border-radius:8px;font-size:.88rem;cursor:pointer;text-decoration:none;font-weight:500!important;display:inline-block}
+.mini[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)!important}
+.back{display:inline-block;margin-bottom:12px;color:var(--accent);font-weight:600;text-decoration:none}
+.gl{display:grid;gap:10px}.gbtn{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;color:var(--text);text-decoration:none;font-weight:600}
+.gt{font-size:1.25rem;margin:0 0 4px}
+.card ul{margin:6px 0 10px;padding-left:20px}
+@media print{nav#tabs,.crisis,.noprint,#lang,.mini{display:none!important}}
+</style>
+<!-- ANALYTICS: paste your analytics snippet on the line below this one -->
+</head>
+<body>
+<main>
+  <div class="top"><div><h1 id="title"></h1><p class="sub" id="sub"></p></div><button class="chip" id="lang"></button></div>
+  <nav id="tabs" aria-label="Sections"></nav>
+  <div class="crisis" id="crisis"></div>
+  <section id="view"></section>
+  <p class="note" id="foot"></p>
+</main>
+<script src="resources.js"></script>
+<script>
+var R=RESOURCES,DET={},ESN={};R.forEach(function(r){if(r.det)DET[r.n]=r.det;if(r.esn)ESN[r.n]=r.esn});
+var SVC_ES={mental:"Salud mental",dental:"Dental",medical:"Atención médica",wellness:"Bienestar y prevención",food:"Comida",childcare:"Cuidado infantil",kidsprog:"Programas para niños y jóvenes",classes:"Clases y educación",housing:"Vivienda y facturas",work:"Empleo y capacitación",legal:"Ayuda legal",recovery:"Adicciones y recuperación",transport:"Transporte",crisis:"Crisis y seguridad"};
+var AGES_ES={kids:"Niños 0-12",teens:"Adolescentes 13-18",young:"Adultos jóvenes 19-39",adults:"Adultos 40-59",seniors:"Mayores 60+"};
+var TOWNS=[["Hood River","Hood River"],["The Dalles","Wasco"],["White Salmon","Klickitat"],["Goldendale","Klickitat"],["Bingen","Klickitat"]];
+var UI={en:{title:"Columbia Gorge Resource Finder",sub:"Free and low-cost help in Hood River, Wasco and Klickitat counties.",find:"Find help",guides:"Quick guides",saved:"My list",towns:"By town",about:"About",help:"Need help right now?",emerg:"Emergency",crisis:"Crisis line",any:"Any local service",s1:"1. What do you need?",s2:"2. Who is it for?",s3:"3. Where do you live?",clear:"Clear all filters",ph:"Search by name or keyword",found:"resources found",none:"No matches. Try fewer filters, or call 211.",whats:"What’s offered",call:"Call",web:"Website",srch:"Search for it",dir:"Directions",save:"Save",unsave:"Saved",share:"Share",copied:"Link copied",back:"← Back",dnote:"",conf:"Please confirm hours and eligibility with the organization before you go.",gi:"Pick the situation that fits. We’ll show the best places to start.",emp:"Nothing saved yet. Tap Save on any resource and it will show up here.",copy:"Copy list",text:"Text it to me",print:"Print",listcopied:"List copied",town:"Choose a town",map:"Open town in Google Maps",foot:"Details change. Please confirm hours, eligibility and phone numbers with each organization. This is a starter list, not a complete directory.",ab1:"This site lists free and low-cost services in Hood River, Wasco and Klickitat counties, organized by what you need, who it is for, and where you live.",ab2:"Information comes from public listings and the organizations’ own sites, and it changes. Call before you go.",stepw:"Step"},
+es:{title:"Buscador de recursos del Columbia Gorge",sub:"Ayuda gratis y de bajo costo en los condados de Hood River, Wasco y Klickitat.",find:"Buscar ayuda",guides:"Guías rápidas",saved:"Mi lista",towns:"Por ciudad",about:"Acerca de",help:"¿Necesita ayuda ahora?",emerg:"Emergencia",crisis:"Línea de crisis",any:"Cualquier servicio local",s1:"1. ¿Qué necesita?",s2:"2. ¿Para quién es?",s3:"3. ¿Dónde vive?",clear:"Borrar filtros",ph:"Buscar por nombre o palabra",found:"recursos encontrados",none:"Sin resultados. Pruebe con menos filtros o llame al 211.",whats:"Qué ofrece",call:"Llamar",web:"Sitio web",srch:"Buscar",dir:"Cómo llegar",save:"Guardar",unsave:"Guardado",share:"Compartir",copied:"Enlace copiado",back:"← Volver",dnote:"Los detalles de esta lista están en inglés por ahora.",conf:"Confirme horarios y requisitos con la organización antes de ir.",gi:"Elija la situación que le corresponde. Le mostramos los mejores lugares para empezar.",emp:"Todavía no ha guardado nada. Toque Guardar en cualquier recurso y aparecerá aquí.",copy:"Copiar lista",text:"Enviarme por mensaje",print:"Imprimir",listcopied:"Lista copiada",town:"Elija una ciudad",map:"Abrir ciudad en Google Maps",foot:"Los datos cambian. Confirme horarios, requisitos y teléfonos con cada organización. Esta es una lista inicial, no un directorio completo.",ab1:"Este sitio reúne servicios gratis y de bajo costo en los condados de Hood River, Wasco y Klickitat, organizados por lo que necesita, para quién es y dónde vive.",ab2:"La información viene de listados públicos y de los sitios de las organizaciones, y cambia. Llame antes de ir.",stepw:"Paso"}};
+var G=[
+{id:"dentist",t:["I need a dentist","Necesito un dentista"],i:["Start with the first option if you are in pain.","Empiece con la primera opción si tiene dolor."],r:["One Community Health","Advantage Dental+ (The Dalles)","NorthShore Medical Group (White Salmon)","Klickitat County Public Health","Oregon Health Plan (OHP)","Washington Apple Health"]},
+{id:"baby",t:["I’m expecting or have a new baby","Estoy embarazada o tengo un bebé"],i:["Support for parents and little ones, most of it free.","Apoyo para padres y bebés, casi todo gratis."],r:["Hood River County Health Department","North Central Public Health District","Next Door, Inc.","Mid-Columbia Children’s Council Head Start","Four Rivers Early Learning & Parenting Hub","One Community Health"]},
+{id:"food",t:["I need food this week","Necesito comida esta semana"],i:["Call ahead to confirm hours.","Llame antes para confirmar el horario."],r:["Oregon Food Finder","Columbia Gorge Food Bank","Wahtonka Food Pantry (The Dalles)","FISH Food Bank (Hood River)","Washington Gorge Action Programs (WAGAP)","211 (Oregon & Washington)"]},
+{id:"mental",t:["I’m struggling with my mental health","Estoy pasando por un momento difícil de salud mental"],i:["In a crisis, call or text 988 right away.","En una crisis, llame o envíe un mensaje al 988 de inmediato."],r:["988 Suicide & Crisis Lifeline","Mental health crisis line (Hood River & Wasco)","Mid-Columbia Center for Living","One Community Health","Klickitat County mental health & crisis options","Substance use treatment (Mid-Columbia Center for Living)"]},
+{id:"rent",t:["I can’t pay rent or bills","No puedo pagar la renta o las facturas"],i:["Act early. Many programs ask for a notice or a bill.","Actúe pronto. Muchos programas piden un aviso o una factura."],r:["Mid-Columbia Community Action Council","Washington Gorge Action Programs (WAGAP)","Mid-Columbia Housing Authority","Oregon Law Center (at One Community Health)","211 (Oregon & Washington)"]},
+{id:"work",t:["I’m looking for work or training","Busco trabajo o capacitación"],i:["Free help with jobs, training and your rights at work.","Ayuda gratis con empleo, capacitación y sus derechos laborales."],r:["WorkSource Oregon (The Dalles & Hood River)","Columbia Gorge Community College","CGCC free GED & ESOL classes","Oregon Human Development Corporation (farmworker jobs)","Oregon Law Center (at One Community Health)"]},
+{id:"home",t:["I want to buy a home","Quiero comprar una casa"],i:["The first class is the usual first step.","La primera clase es el paso habitual."],r:["CGCC Homebuyer Education","Columbia Cascade Housing Corp","Mid-Columbia Housing Authority"]},
+{id:"childcare",t:["I need child care","Necesito cuidado infantil"],i:["Openings are limited, so start early.","Hay pocos cupos, así que empiece pronto."],r:["Child Care Partners (CGCC)","Mid-Columbia Children’s Council Head Start","Four Rivers Early Learning & Parenting Hub","Child Care Aware of Washington","Oregon Child Development Coalition","211 (Oregon & Washington)"]},
+{id:"ride",t:["I need a ride without a car","Necesito transporte sin carro"],i:["Buses connect the Gorge counties and Portland.","Los autobuses conectan los condados del Gorge y Portland."],r:["Columbia Area Transit (CAT)","The Link Public Transit","Mt. Adams Transportation Service (MATS)","GOrge Pass","GoVets Columbia Gorge Program"]},
+{id:"kids",t:["Activities for my kids","Actividades para mis hijos"],i:["Sports, outdoors, libraries and drop-in centers.","Deportes, aire libre, bibliotecas y centros sin cita."],r:["Hood River Valley Parks + Recreation","Columbia Gorge Junior Kayak Club","Gorge Junior Sailing","Hood River County Library District","Community Youth Center (White Salmon)","Klickitat County 4-H (WSU Extension)","Columbia Gorge ESD youth STEM programs"]}
+];
+function slug(n){return n.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
+var byId={},byName={};R.forEach(function(r){r.id=slug(r.n);byId[r.id]=r;byName[r.n]=r});
+function sget(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function sset(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+var lang=sget("gorge_lang")||((navigator.language||"").slice(0,2)==="es"?"es":"en");
+var saved=[];try{saved=JSON.parse(sget("gorge_saved")||"[]")}catch(e){saved=[]}
+if(!Array.isArray(saved))saved=[];
+var S={s:[],a:[],c:[],q:"",town:"Hood River"};
+function T(k){return (UI[lang]&&UI[lang][k])||UI.en[k]||""}
+function track(name,props){props=props||{};try{if(window.goatcounter&&window.goatcounter.count){var gl=props.resource||props.value||props.term||props.lang||"";window.goatcounter.count({path:(name+(gl?" - "+gl:"")).replace(/^\//,""),title:name,event:true})}if(window.plausible)window.plausible(name,{props:props});if(window.gtag)window.gtag("event",name,props);(window.dataLayer=window.dataLayer||[]).push(Object.assign({event:name},props))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function has(a,v){return a.indexOf(v)>-1}
+function $(id){return document.getElementById(id)}
+function svcL(id){if(lang==="es"&&SVC_ES[id])return SVC_ES[id];var f=SVC.filter(function(p){return p[0]===id})[0];return f?f[1]:id}
+function ageL(id){if(lang==="es"&&AGES_ES[id])return AGES_ES[id];var f=AGES.filter(function(p){return p[0]===id})[0];return f?f[1]:id}
+function nm(r){return (lang==="es"&&ESN[r.n])||r.n}
+function ds(r){return (lang==="es"&&r.es)||r.d}
+function match(r,skip){return (skip==="s"||!S.s.length||r.s.some(function(x){return has(S.s,x)}))&&(skip==="a"||!S.a.length||r.a.some(function(x){return has(S.a,x)}))&&(skip==="c"||!S.c.length||r.c.some(function(x){return has(S.c,x)}))&&(!S.q||(r.n+" "+r.d+" "+(r.es||"")).toLowerCase().indexOf(S.q.toLowerCase())>-1)}
+function mapUrl(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q)}
+function links(r){var o="";if(r.ph)o+='<a href="tel:'+esc(r.ph.replace(/[^0-9]/g,""))+'" data-track="call" data-name="'+esc(r.n)+'">'+T("call")+" "+esc(r.ph)+"</a>";
+ if(r.u)o+='<a href="'+esc(r.u)+'" target="_blank" rel="noopener" data-track="website" data-name="'+esc(r.n)+'">'+T("web")+"</a>";else if(r.find)o+='<a href="https://www.google.com/search?q='+encodeURIComponent(r.n+" Columbia Gorge")+'" target="_blank" rel="noopener" data-track="search" data-name="'+esc(r.n)+'">'+T("srch")+"</a>";return o}
+function heart(r){var on=has(saved,r.id);return '<button class="mini" data-save="'+r.id+'" aria-pressed="'+on+'">'+(on?"♥ "+T("unsave"):"♡ "+T("save"))+"</button>"}
+function tags(r){return r.s.map(function(x){return '<span class="tag svc">'+esc(svcL(x))+"</span>"}).join("")+'<span class="tag">'+esc(r.c.length===3?(lang==="es"?"Los tres condados":"All three counties"):r.c.join(", "))+"</span>"}
+function card(r,num){return '<div class="card"><h2>'+(num?'<span class="num">'+num+"</span>":"")+'<a class="tl" href="#r-'+r.id+'" data-track="detail" data-name="'+esc(r.n)+'">'+esc(nm(r))+"</a></h2>"+tags(r)+"<p>"+esc(ds(r))+"</p>"+(DET[r.n]?'<a class="more" href="#r-'+r.id+'" data-track="detail" data-name="'+esc(r.n)+'">'+T("whats")+" →</a>":"")+'<div class="acts">'+links(r)+heart(r)+"</div></div>"}
+function chipsHTML(list,key,lab){return list.map(function(p){return '<button class="chip" data-f="'+key+'" data-v="'+esc(p[0])+'" aria-pressed="'+has(S[key],p[0])+'">'+esc(lab?lab(p):p[1])+"</button>"}).join("")}
+function countyChips(){return chipsHTML(COUNTIES.map(function(c){return[c,c]}),"c")}
+function viewFind(){
+ if(!$("list")){$("view").innerHTML='<div class="step"><div class="label">'+T("s1")+'</div><div class="chips" id="svcs"></div></div><div class="step"><div class="label">'+T("s2")+'</div><div class="chips" id="ages"></div></div><div class="step"><div class="label">'+T("s3")+'</div><div class="chips" id="counties"></div></div><button class="clear" id="clear">'+T("clear")+'</button><input type="search" id="q" placeholder="'+T("ph")+'" aria-label="'+T("ph")+'" value="'+esc(S.q)+'"><div class="count" id="count"></div><div id="list"></div>';
+  $("q").addEventListener("input",function(e){S.q=e.target.value;updFind()});$("q").addEventListener("change",function(e){if(e.target.value)track("search",{term:e.target.value.toLowerCase()})});
+  $("clear").onclick=function(){S.s=[];S.a=[];S.c=[];S.q="";$("q").value="";updFind()}}
+ updFind()}
+function updFind(){
+ $("svcs").innerHTML=SVC.map(function(p){var n=R.filter(function(r){return has(r.s,p[0])&&match(r,"s")}).length;return '<button class="chip" data-f="s" data-v="'+p[0]+'" aria-pressed="'+has(S.s,p[0])+'">'+esc(svcL(p[0]))+"<small>"+n+"</small></button>"}).join("");
+ $("ages").innerHTML=chipsHTML(AGES,"a",function(p){return ageL(p[0])});$("counties").innerHTML=countyChips();
+ var out=R.filter(function(r){return match(r)});$("count").textContent=out.length+" "+T("found");
+ $("list").innerHTML=out.map(function(r){return card(r)}).join("")||"<p>"+T("none")+"</p>"}
+function viewGuides(gid){
+ if(!gid){$("view").innerHTML='<p class="sub">'+T("gi")+'</p><div class="gl">'+G.map(function(g){return '<a class="gbtn" href="#g-'+g.id+'" data-track="guide" data-name="'+g.id+'">'+esc(g.t[lang==="es"?1:0])+"</a>"}).join("")+"</div>";return}
+ var g=G.filter(function(x){return x.id===gid})[0];if(!g){location.hash="guides";return}
+ var i=lang==="es"?1:0,list=g.r.map(function(n){return byName[n]}).filter(function(r){return r&&(!S.c.length||r.c.some(function(x){return has(S.c,x)}))});
+ $("view").innerHTML='<a class="back" href="#guides">'+T("back")+"</a><h2 class=\"gt\">"+esc(g.t[i])+'</h2><p class="sub">'+esc(g.i[i])+'</p><div class="label">'+T("s3")+'</div><div class="chips" id="counties">'+countyChips()+'</div><div style="height:14px"></div>'+list.map(function(r,k){return card(r,k+1)}).join("")}
+function viewSaved(){
+ var list=saved.map(function(id){return byId[id]}).filter(Boolean);
+ if(!list.length){$("view").innerHTML="<p>"+T("emp")+"</p>";return}
+ $("view").innerHTML='<div class="acts noprint"><button class="mini" data-act="copy">'+T("copy")+'</button><a class="mini" data-act="text" href="'+("sms:?&body="+encodeURIComponent(listText(list)))+'">'+T("text")+'</a><button class="mini" data-act="print">'+T("print")+"</button></div><div style=\"height:12px\"></div>"+list.map(function(r){return card(r)}).join("")}
+function listText(list){return list.map(function(r){return nm(r)+(r.ph?" - "+r.ph:"")+(r.u?" - "+r.u:"")}).join("\n")}
+function townHas(r,t){var tx=(r.n+" "+r.d+" "+(DET[r.n]||[]).join(" ")).toLowerCase(),name=t[0].toLowerCase();if(tx.indexOf(name)>-1)return true;
+ var others=TOWNS.filter(function(x){return x[1]===t[1]&&x[0]!==t[0]&&tx.indexOf(x[0].toLowerCase())>-1});return !others.length&&has(r.c,t[1])&&!(t[1]==="Hood River"&&false)}
+function viewTowns(){var t=TOWNS.filter(function(x){return x[0]===S.town})[0]||TOWNS[0];var list=R.filter(function(r){return townHas(r,t)});
+ $("view").innerHTML='<div class="label">'+T("town")+'</div><div class="chips">'+TOWNS.map(function(x){return '<button class="chip" data-town="'+esc(x[0])+'" aria-pressed="'+(x[0]===t[0])+'">'+esc(x[0])+"</button>"}).join("")+'</div><p><a class="mini" target="_blank" rel="noopener" href="'+mapUrl(t[0]+", "+(t[1]==="Klickitat"?"WA":"OR"))+'" data-track="town_map" data-name="'+esc(t[0])+'">'+T("map")+'</a></p><div class="count">'+list.length+" "+T("found")+"</div>"+list.map(function(r){return card(r)}).join("")}
+function viewAbout(){$("view").innerHTML="<p>"+T("ab1")+"</p><p>"+T("ab2")+"</p>"}
+function viewDetail(r){var d=DET[r.n]||[];
+ $("view").innerHTML='<a class="back" href="#find" id="bk">'+T("back")+'</a><div class="card"><h2>'+esc(nm(r))+"</h2>"+tags(r)+"<p>"+esc(ds(r))+"</p>"+(d.length?'<div class="label">'+T("whats")+"</div><ul>"+d.map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+"</ul>"+(lang==="es"?'<p class="sub">'+T("dnote")+"</p>":""):"")+'<div class="label">'+(lang==="es"?"Edades":"Ages")+'</div><p>'+r.a.map(ageL).map(esc).join(" · ")+'</p><div class="acts">'+links(r)+'<a href="'+mapUrl(r.n+" Columbia Gorge")+'" target="_blank" rel="noopener" data-track="directions" data-name="'+esc(r.n)+'">'+T("dir")+"</a></div><div class=\"acts\">"+heart(r)+'<button class="mini" data-act="share" data-id="'+r.id+'">'+T("share")+'</button></div><p class="sub">'+T("conf")+"</p></div>";
+ $("bk").addEventListener("click",function(e){if(history.length>1){e.preventDefault();history.back()}})}
+function render(){
+ document.documentElement.lang=lang;document.title=T("title");
+ $("title").textContent=T("title");$("sub").textContent=T("sub");$("foot").textContent=T("foot");
+ $("lang").textContent=lang==="es"?"English":"Español";$("lang").setAttribute("aria-label",lang==="es"?"Switch to English":"Cambiar a español");
+ $("crisis").innerHTML="<strong>"+T("help")+"</strong> "+T("emerg")+' <a href="tel:911" data-track="call" data-name="911">911</a> · '+T("crisis")+' <a href="tel:988" data-track="call" data-name="988">988</a> · '+T("any")+' <a href="tel:211" data-track="call" data-name="211">211</a>';
+ var h=location.hash.slice(1),tab="find";
+ if(h.indexOf("r-")===0&&byId[h.slice(2)])tab="detail";else if(h.indexOf("g-")===0)tab="guides";else if(has(["find","guides","saved","towns","about"],h))tab=h;
+ var cur=tab==="detail"?"find":tab;
+ $("tabs").innerHTML=["find","guides","saved","towns","about"].map(function(k){return '<a href="#'+k+'"'+(k===cur?' aria-current="page"':"")+">"+T(k)+(k==="saved"&&saved.length?" ("+saved.length+")":"")+"</a>"}).join("");
+ if(tab!=="find")$("view").innerHTML=$("view").innerHTML,0;
+ if(tab==="find"){viewFind()}else if(tab==="detail"){viewDetail(byId[h.slice(2)])}else if(tab==="guides"){viewGuides(h.indexOf("g-")===0?h.slice(2):null)}else if(tab==="saved"){viewSaved()}else if(tab==="towns"){viewTowns()}else{viewAbout()}
+}
+document.addEventListener("click",function(e){var el=e.target.closest?e.target.closest("[data-f],[data-save],[data-act],[data-town],a[data-track],#lang"):null;if(!el)return;
+ if(el.id==="lang"){lang=lang==="es"?"en":"es";sset("gorge_lang",lang);track("language",{lang:lang});var f=$("list");if(f)f.id="";render();return}
+ if(el.hasAttribute("data-f")){var k=el.getAttribute("data-f"),v=el.getAttribute("data-v"),i=S[k].indexOf(v);if(i>-1)S[k].splice(i,1);else S[k].push(v);track("filter",{type:k,value:v,on:i<0});
+  if($("list")&&location.hash.slice(1).indexOf("g-")!==0&&!has(["guides","saved","towns","about"],location.hash.slice(1)))updFind();else render();return}
+ if(el.hasAttribute("data-town")){S.town=el.getAttribute("data-town");track("town",{value:S.town});render();return}
+ if(el.hasAttribute("data-save")){var id=el.getAttribute("data-save"),j=saved.indexOf(id);if(j>-1)saved.splice(j,1);else saved.push(id);sset("gorge_saved",JSON.stringify(saved));track("save",{resource:id,on:j<0});var f2=$("list");if(f2)f2.id="";render();return}
+ var a=el.getAttribute("data-act");
+ if(a==="copy"){var txt=listText(saved.map(function(x){return byId[x]}).filter(Boolean));try{navigator.clipboard.writeText(txt);el.textContent=T("listcopied")}catch(x){}track("saved_copy");return}
+ if(a==="print"){try{window.print()}catch(x){}track("saved_print");return}
+ if(a==="share"){var r=byId[el.getAttribute("data-id")],url=location.href;track("share",{resource:r.n});try{if(navigator.share){navigator.share({title:nm(r),url:url})}else{navigator.clipboard.writeText(url);el.textContent=T("copied")}}catch(x){try{navigator.clipboard.writeText(url);el.textContent=T("copied")}catch(y){}}return}
+ if(el.matches&&el.matches("a[data-track]")){track("click_"+el.getAttribute("data-track"),{resource:el.getAttribute("data-name")})}
+});
+document.addEventListener("click",function(e){var el=e.target.closest?e.target.closest("a.tl,a.more,a.gbtn,#tabs a"):null;if(el){var f3=$("list");if(f3)f3.id=""}},true);
+window.addEventListener("hashchange",function(){window.scrollTo(0,0);render()});
+render();track("pageview_app");
+
+</script>
+</body>
+</html>
